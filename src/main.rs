@@ -27,6 +27,10 @@ struct Args {
     #[arg(short = 'f', long = "ftype", default_value = "ascii")]
     ftype: String,
 
+    /// Decimal Seperator
+    #[arg(long = "decimal", default_value = ".")]
+    to_sep: String,
+
     /// Rgb tripple
     #[arg(long = "rgb", num_args = 3, value_parser = clap::value_parser!(u8))]
     rgb: Option<Vec<u8>>,
@@ -61,8 +65,13 @@ fn run() -> Result<(), Box<dyn Error>> {
 
     let content = fs::read_to_string(&file_path)?;
     let ascii_content = content.replace(",", " ");
-    let out_path: String;
 
+    // Set decimal seperator explicitly
+    let to_sep = args.to_sep;
+    let ascii_content = ascii_content.replace(".", &to_sep);
+
+
+    let out_path: String;
     match args.ftype.as_str() {
         "ascii" => {
             out_path = format!("{}.ascii", file_path.with_extension("").to_string_lossy());
@@ -79,7 +88,6 @@ fn run() -> Result<(), Box<dyn Error>> {
             ));
         }
     }
-
 
     // Add rgb values if provided
     let final_content = if let Some(rgb) = rgb {
